@@ -4,6 +4,8 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+
+    <link rel="stylesheet" type="text/css" href="calendar.css">
 </head>
 
 <body>
@@ -30,443 +32,69 @@
     <hr>
     <div id="calendar"></div>
 </body>
-
+<script src="library.js"></script>
+<script src="date_ext.js"></script>
+<script src="calendar.js"></script>
 <script>
+    "use strict";
 
-    const SUNDAY = 0;
-    const MONDAY = 1;
-    const TUESDAY = 2;
-    const WEDNESDAY = 3;
-    const THURSDAY = 4;
-    const FRIDAY = 5;
-    const SATURDAY = 6;
-
-    const JANUARY = 0;
-    const FEBRUARY = 1;
-    const MARCH = 2;
-    const APRIL = 3;
-    const MAY = 4;
-    const JUNE = 5;
-    const JULY = 6; 
-    const AUGUST = 7;
-    const SEPTEMBER = 8;
-    const OCTOBER = 9;
-    const NOVEMBER = 10;
-    const DECEMBER = 11;
-
-    const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    const WEEKDAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-
-    const DAY = 1000 * 60 * 60 * 24;
-    const WEEK = DAY * 7;
-    const BIWEEK = WEEK * 2;
-    const YEAR = DAY * 365;
-    
     // 2012 Federal Pay Period 1 : 20120101
-
-    Number.prototype.toDigits = function(len)
-    {
-        var str = this + '';
-        while (str.length < len)
-            str = '0' + str;
-        return str;
-    }
-
-    Date.thisYear = function()
-    {
-        return new Date().getFullYear();
-    }
-
-    Date.prototype.lastYear = function()
-    {
-        var newDate = new Date(this);
-        newDate.setFullYear(this.getFullYear() - 1);
-        return new Date(newDate);
-    }
-
-    Date.prototype.nextYear = function()
-    {
-        var newDate = new Date(this);
-        newDate.setFullYear(this.getFullYear() + 1);
-        return new Date(newDate);
-    }
-
-    Date.prototype.getWeekDay = function()
-    {        
-        return WEEKDAYS[this.getDay()];
-    }
-
-    Date.prototype.nextDate = function(days = 1)
-    {
-        var newDate = new Date(this);
-        newDate.setDate(this.getDate()+days);
-        return newDate;        
-    }
-
-    Date.daysInMonth = function*(year = Date.thisYear(), month)
-    {
-        var day = new Date(year, month, 1);
-        while (day.getMonth() == month)
-        {            
-            yield day;
-            day = day.nextDate();
-        }        
-    }
-
-    Date.nthDayOfMonth = function(count, day, month, year = Date.thisYear(), name = "")
-    {
-        var counter = 0;
-        for (var date of Date.daysInMonth(year, month))
-        {
-            if (date.getWeekDay() == WEEKDAYS[day]) counter++;
-            if (counter == count) return date;
-        }        
-    }
-
-    Date.lastDayOfMonth = function(day, month, year = Date.thisYear(), name = "")
-    {
-        var list = [];
-        for (var date of Date.daysInMonth(year, month))
-        {
-            if (date.getWeekDay() == WEEKDAYS[day]) list.push(date);            
-        }
-        var date = list.pop();
-        date.holidayName = name;
-        return date;
-    }
-
-    Date.findSetHoliday = function(month, date, year = Date.thisYear(), name = "")
-    {        
-        var holiday = new Date(year, month, date);
-        if (holiday.getDay() == SATURDAY)
-        {
-            holiday = holiday.nextDate(-1);            
-        }
-        else if (holiday.getDay() == SUNDAY)
-        {
-            holiday = holiday.nextDate();
-        }
-        holiday.holidayName = name;
-        return holiday; 
-    }
-
-    Date.NewYear = function(year = Date.thisYear())
-    {
-        var newDate = new Date(year, JANUARY, 1);        
-        newDate.holidayName = "New Year's Day"
-        return newDate;        
-    }
-
-    Date.getFederalHolidays = function(startDate = Date.NewYear())
-    {
-        var calendarYear = (month) => 
-        {
-            if (month < startDate.getMonth()) 
-                return startDate.getFullYear() + 1;
-            else
-                return startDate.getFullYear();
-        }
-
-        return [
-            Date.NewYear(calendarYear(JANUARY)),
-            Date.nthDayOfMonth(3,MONDAY, JANUARY, calendarYear(JANUARY), "Martin Luther King's Birthday"),
-            Date.nthDayOfMonth(3,MONDAY, FEBRUARY, calendarYear(FEBRUARY), "President's Day"),
-            Date.lastDayOfMonth(MONDAY, MAY, calendarYear(MAY), "Memorial Day"),
-            Date.findSetHoliday(JULY,4,calendarYear(JULY), "Independence Day"),
-            Date.nthDayOfMonth(1,MONDAY,SEPTEMBER, calendarYear(SEPTEMBER), "Labor Day"),
-            Date.nthDayOfMonth(2,MONDAY,OCTOBER, calendarYear(OCTOBER), "Columbus Day"),
-            Date.findSetHoliday(NOVEMBER,11, calendarYear(NOVEMBER), "Veteran's Day"),
-            Date.nthDayOfMonth(4,THURSDAY,NOVEMBER, calendarYear(NOVEMBER), "Thanksgiving Day"),
-            Date.findSetHoliday(DECEMBER,25, calendarYear(DECEMBER), "Christmas Day")
-        ];
-    }
-
-    Date.getDaysOffset = function(start, end)
-    {
-        return Math.round( (end - start) / DAY );
-    }
-
-    Date.getDaysInSpan = function*(start, end)
-    {                
-        var backwards = end < start;
-        if (backwards)
-        {
-            var day = new Date(end);
-            while (day <= start)
-            {            
-                yield day;
-                day = day.nextDate();
-            }
-        }
-        else
-        {
-            var day = new Date(start);
-            while (day <= end)
-            {            
-                yield day;
-                day = day.nextDate();
-            }
-        }         
-    }
-
-    Date.prototype.addDaysOffset = function(days)
-    {        
-        return new Date(this).nextDate(days);        
-    }
     
-    Date.prototype.getMonthStr = function()
-    {        
-        return MONTHS[this.getMonth()];
-    }
-
-    Date.prototype.toISODateStr = function()
-    {
-        return this.toISOString().split('T')[0];
-    }
-
-    Date.prototype.toISODate = function()
-    {
-        return this.toISODateStr().replace(/-/g,'');        
-    }
-
-    Date.fromISODate = function(str)
-    {
-        var newDate = null;
-        var not_a_number = str == null || str == "" || ( /^\d+$/.test(str) === false );            
-        if (not_a_number) return null;        
-        try
-        {
-            if (str.length != 8) return null;
-
-            var year = str.substr(0,4);
-            newDate = new Date(year,JANUARY,1);
-            if (str.length > 4)
-            {
-                var month = parseInt(str.substr(4,2))-1;
-                newDate.setMonth(month);
-            }            
-            if (str.length == 8)
-            {
-                var date = str.substr(6,2);
-                newDate.setDate(date);
-            }                 
-        }
-        catch (exception)
-        {
-            console.log(exception); 
-            console.log(newDate);           
-        }                
-        return newDate;
-    }
-
-    Date.prototype.getCalendarStr = function()
-    {
-        if (this.holidayName == null) this.holidayName = "";
-        var calendarStr = this.getWeekDay() + " " + this.getMonthStr() + " " + this.getDate() + ", " + this.getFullYear();
-        return calendarStr;
-    }
-
-    const DEFAULTSPAN = 365;
-    const DEFAULTSTART = Date.NewYear();
-    const DEFAULTEND = Date.NewYear().addDaysOffset(DEFAULTSPAN);
-
-    class Calendar
-    {
-        myStartDate = null;
-        myEndDate = null;
-        myDivId = "calendar";
-        div = null;
-    
-        constructor(divId = "calendar", startDate = DEFAULTSTART, endDate = DEFAULTEND)
-        {
-            this.div = document.getElementById(divId);
-            if (this.div == null)
-            {
-                throw "id " + divId + " not found";
-                return;
-            }
-            this.myDivId = divId;
-            this.myStartDate = new Date(startDate);
-            this.myEndDate = new Date(endDate);            
-            this.draw();                      
-        }
-
-        insertDay(someDate)
-        {            
-            var day = document.createElement("div");
-            day.id = someDate.toISODate();
-            day.innerText = someDate.getCalendarStr();        
-            day.classList.add("date");  
-            
-            var isSunday = someDate.getDay() === 0;
-            var isSaturday = someDate.getDay() === 6;
-            var isWeekend = isSaturday || isSunday;
-
-            if (someDate.isBackdate)
-            {
-                day.classList.add("backdate");
-            }
-            else
-            {                
-                if (isWeekend) day.classList.add("weekend");                
-                if (isSaturday) day.classList.add("saturday");  
-                if (isSunday) day.classList.add("sunday");
-            }            
-            
-            var calendar = document.getElementById(this.myDivId);
-            if (isSunday) 
-            {
-                var bump = document.createElement("div");
-                bump.classList.add("week");
-                this.div.appendChild(bump);
-            }
-            this.div.appendChild(day);
-        }
-
-        markWeeks(offset = 0)
-        {
-            var counter = 1;            
-            for (var week of document.getElementsByClassName("week"))
-            {
-                week.innerText = "";
-                week.classList = ["week"];
-                if (counter > offset)
-                {
-                    var weeknumber = counter - offset;
-                    var name = "week" + weeknumber.toDigits(2);
-                    week.classList.add(name);
-                    week.innerText = name;
-                    week.setAttribute('data-week', weeknumber);                    
-                }
-                counter++; 
-
-            }
-        }    
-
-        draw()
-        {
-            var offset = this.myStartDate.getDay();
-            if (offset != 0)
-            {
-                var offsetStart = new Date(this.myStartDate).nextDate(-offset);
-                var offsetEnd = new Date(this.myStartDate).nextDate(-1);         
-                for (var day of Date.getDaysInSpan(offsetStart, offsetEnd))
-                {
-                    day.isBackdate = true;                
-                    this.insertDay(day);
-                }
-            }            
-            for (var day of Date.getDaysInSpan(this.myStartDate, this.myEndDate))
-            {                
-                this.insertDay(day);
-            }            
-
-            for (var date of Date.getFederalHolidays(this.myStartDate))
-            {
-                configureElement(date.toISODate(), (calendarDate) =>
-                {
-                    calendarDate.classList.add("holiday");
-                    calendarDate.innerText = calendarDate.innerText + " " + date.holidayName;                
-                });                    
-            }
-
-            this.markWeeks(0);                        
-        }        
-    }
-
-    function doRedirect(params)
-    {
-        var url = window.location.href.split('?')[0] + "?" + params;
-        window.location.href = url;
-    }
-
-    function getUrlParameters()
-    {
-        var urlStr = window.location.search.substring(1) || null;
-        if (urlStr == null) return {};
-        var params = {};
-        urlStr.split('&').forEach( (param) =>
-        {
-            try
-            {
-                var [key, value] = param.split('=');                
-                params[key] = value;
-            } 
-            catch(e)
-            {
-                console.log(e);
-            }
-        });        
-        return params;
-    }
-
     function getStartEndSpan()
     {
-        var args = getUrlParameters();         
-        var start = Date.fromISODate(args.start) || DEFAULTSTART;
-        var dateSpan = DEFAULTSPAN;
-        var end = start.addDaysOffset(DEFAULTSPAN);
+        let args = getUrlParameters();         
+        let start = Date.fromISODate(args.start) || Calendar.DEFAULTSTART;
+        let dateSpan = Calendar.DEFAULTSPAN;
+        let end = start.addDaysOffset(Calendar.DEFAULTSPAN);
+        console.log("getStartEndSpan:", JSON.stringify(args));
         if (args.hasOwnProperty('end')) {
             end = Date.fromISODate(args.end);
-            dateSpan = Date.getDaysOffset(start, end);
+            dateSpan = Date.getDaysOffset(start, end);            
         }
-        return [start, end, dateSpan];
-    }
-
-    function configureElement( id, setupFunction )
-    {
-        var element = document.getElementById(id);
-        if (element == null)
+        if (start > end)
         {
-            console.log("element id: " + id + " not found");
-            return;
+            doRedirect("start=" + end.toISODate() + "&end=" + start.toISODate());
         }
-        else setupFunction(element);        
+        else
+            return [start, end, dateSpan];
     }
-       
+     
     function main(event) 
     {        
-        var [start, end, dateSpan] = getStartEndSpan();        
+        let [start, end, dateSpan] = getStartEndSpan();        
 
-        var calendar = new Calendar(divId = "calendar", startDate = start, endDate = end);
+        const calendar = new Calendar("calendar", start, end);
+        calendar.showHolidays();
+
+        const monthSelector = new Date.MonthDropDown("selectMonth", start.getMonth(), (event) =>
+        {
+            let month = event.target.selectedIndex;
+            let newDate = new Date(start.getFullYear(),month,1);
+            let newEnd = new Date(newDate.addDaysOffset(dateSpan));
+            doRedirect("start=" + newDate.toISODate() + "&end=" + newEnd.toISODate());
+        });    
 
         document.getElementById("currentYear").innerText = start.toISODateStr();
+
         configureElement("btnLastYear", (lastYearButton) =>
         {
-            var lastyear = start.lastYear(); 
-            var lastyearEnd = new Date(lastyear).nextDate(dateSpan);            
+            let lastyear = start.lastYear(); 
+            let lastyearEnd = new Date(lastyear).nextDate(dateSpan);            
             lastYearButton.innerText = lastyear.toISODateStr();
             lastYearButton.onclick = (event) =>
             {
                 doRedirect("start=" + lastyear.toISODate() + "&end=" + lastyearEnd.toISODate());
             }
         });
+        
         configureElement("btnNextYear", (nextYearButton) =>
         {
-            var nextyear = start.nextYear();
-            var nextyearEnd = new Date(nextyear).nextDate(dateSpan);            
+            let nextyear = start.nextYear();
+            let nextyearEnd = new Date(nextyear).nextDate(dateSpan);            
             nextYearButton.innerText = nextyear.toISODateStr();
             nextYearButton.onclick = (event) =>
             {
                 doRedirect("start=" + nextyear.toISODate() + "&end=" + nextyearEnd.toISODate());
-            };
-        });
-        configureElement("selectMonth", (selectMonth) =>
-        {
-            MONTHS.forEach( (month, index) =>
-            {            
-                var newMonth = document.createElement("option");
-                newMonth.value = index;
-                newMonth.text = month;
-                newMonth.classList.add("month_choice");
-                selectMonth.appendChild(newMonth);
-            });   
-            selectMonth.selectedIndex = start.getMonth();
-            selectMonth.onchange = (event) =>
-            {
-                var month = event.target.selectedIndex;
-                var newDate = new Date(start.getFullYear(),month,1);
-                doRedirect("start=" + newDate.toISODate());
             };
         });
 
@@ -474,7 +102,7 @@
         {
             ppOffset.onchange = (event) =>
             {
-                var value = event.target.valueAsNumber;
+                let value = event.target.valueAsNumber;
                 calendar.markWeeks(value);
             };
         });
@@ -488,72 +116,4 @@
 
 </script>
 
-<style>
-    #calendar {
-        display: table;
-    }
-
-    #currentYear {
-        font-weight: bolder;
-    }
-
-    div.date {
-        float: left;
-        border : 1px solid black;
-        height: 24vh;
-        width: 12vw;
-        padding : 1px;
-    }
-
-    div.week {
-        float: left;
-        border : 1px solid black;
-        height: 24vh;
-        width: 8vw;
-        padding : 1px;
-        display: block;
-        clear: both;
-        background-color: lightgoldenrodyellow;
-    }   
-
-    hr {
-        display: block;
-        clear: both;
-    }
-
-    div.weekend {
-        background-color: #efefef;
-    }
-
-    div.backdate {
-        border : 1px solid gray;
-        color: gray;
-        background: #bbb;
-    }
-
-    div.holiday {
-        background-color: #ddf;
-    }
-
-    div.controls {
-        float: left;
-        margin: 5px;
-        font-size: 2.5vh;        
-    }
-
-    button, input, select {
-        font-size: 2.5vh;
-    }
-
-    label {
-        font-size: 3vh;
-    }
-
-    input[type=number]::-webkit-inner-spin-button, 
-    input[type=number]::-webkit-outer-spin-button {  
-        opacity: 1;        
-        transform: scale(1.75);        
-    }
-    
-</style>
 </html>
