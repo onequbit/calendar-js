@@ -1,5 +1,7 @@
     "use strict";
 
+    
+
     function attachConstant( someObj, constantName, constantValue, prototype = true )
     {        
         var attributes = {
@@ -65,13 +67,32 @@
     function configureElement( id, setupFunction, debug = false )
     {
         let element = document.getElementById(id);        
-        if (element == null)
+        if (element)
         {
+            setupFunction(element)
+        }
+        else 
+        {            
             if (debug) console.log("element id: " + id + " not found");
             return;
-        }
-        else setupFunction(element);        
+        }        
     }
 
     HTMLCollection.prototype.forEach = Array.prototype.forEach;
+
+    function forElementClass( className, mappedFunction, debug = false )
+    {
+        document.getElementsByClassName(className).forEach( function(element)
+        {
+            if (element)
+            {
+                mappedFunction(element)
+            }
+            else 
+            {            
+                if (debug) console.log("element class: " + id + " not found");
+                return;
+            }     
+        })
+    }
 

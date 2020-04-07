@@ -25,6 +25,12 @@
         &nbsp;&nbsp;&nbsp;
     </div>
     <div class="controls">
+        <button id="btnShowWeeks">Weeks</button>
+    </div>
+    <div class="controls">
+        <button id="btnShowHolidays">Holidays</button>
+    </div>
+    <div id="spinnerWeekOffset" class="controls">
         Week Offset
         <input id="ppOffset" type="number" min="-13" max="13" step="1" value="0">
     </div>
@@ -64,7 +70,7 @@
         let [start, end, dateSpan] = getStartEndSpan();        
 
         const calendar = new Calendar("calendar", start, end);
-        calendar.showHolidays();
+        //calendar.toggleHolidays();
 
         const monthSelector = new Date.MonthDropDown("selectMonth", start.getMonth(), (event) =>
         {
@@ -98,8 +104,49 @@
             };
         });
 
+        configureElement("btnShowWeeks", (showWeeksButton) =>
+        {            
+            showWeeksButton.onclick = (event) =>
+            {
+                calendar.toggleWeeks();
+                if (calendar.showWeeks)
+                {
+                    showWeeksButton.classList.add('active');
+                    configureElement("spinnerWeekOffset", (spinner) =>
+                    {
+                        spinner.style.visibility = 'visible';
+                    });
+                }
+                else
+                {
+                    showWeeksButton.classList.remove('active');
+                    configureElement("spinnerWeekOffset", (spinner) =>
+                    {
+                        spinner.style.visibility = 'hidden';
+                    }); 
+                }                
+            };
+        });
+
+        configureElement("btnShowHolidays", (showHolidaysButton) =>
+        {            
+            showHolidaysButton.onclick = (event) =>
+            {
+                calendar.toggleHolidays();
+                if (calendar.showHolidays)
+                {
+                    showHolidaysButton.classList.add('active');
+                }
+                else
+                {
+                    showHolidaysButton.classList.remove('active');
+                }
+            };
+        });
+
         configureElement("ppOffset", function(ppOffset)
-        {
+        {            
+           
             ppOffset.onchange = (event) =>
             {
                 let value = event.target.valueAsNumber;

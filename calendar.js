@@ -5,13 +5,17 @@
         DEFAULTSPAN = 365;
         DEFAULTSTART = Date.NewYears();
         DEFAULTEND = Date.NewYears().addDaysOffset(this.DEFAULTSPAN);
+        showWeeks = false;
+        showHolidays = false;
 
-        constructor(divId, startDate = this.DEFAULTSTART, endDate = this.DEFAULTEND)
+        constructor(divId, startDate = this.DEFAULTSTART, endDate = this.DEFAULTEND, showWeeks = false, showHolidays = false, weekOffset = 0)
         {        
             this.myDivId = divId;
             this.myStartDate = new Date(startDate);
             this.myEndDate = new Date(endDate);
-            this.weekOffset = 0;
+            this.weekOffset = weekOffset;
+            this.showWeeks = showWeeks;
+            this.showHolidays = showHolidays;
             this.div = document.getElementById(divId);
             console.log("drawing calendar:", this);            
             if (this.div != null)
@@ -54,25 +58,57 @@
                 {
                     day.classList.add("sunday");
                 }
-            }            
+            }
                         
             if (isSunday) 
             {
                 let bump = document.createElement("div");
-                bump.classList.add("week");                
+                bump.classList.add("week");
+
+                if (this.showWeeks)
+                    bump.style.display = "initial";
+                else
+                    bump.style.display = "none";
+
                 this.div.appendChild(bump);
             }
             this.div.appendChild(day);
+            if (isSaturday)
+            {
+                let EOL = document.createElement("div");
+                EOL.classList.add("EOL");
+                this.div.appendChild(EOL);
+            }
         }
 
-        markWeeks(offset = 0)
+        toggleWeeks()
         {
-            let counter = 1;                            
-            document.getElementsByClassName("week").forEach( (week) =>
+            this.showWeeks = !this.showWeeks;
+             
+            forElementClass("week", (week) =>
+            {
+                if (this.showWeeks)
+                    week.style.display = "initial";
+                else
+                    week.style.display = "none";
+            });            
+        }
+
+        markWeeks(offset)
+        {
+            if (this.weekOffset != offset) this.weekOffset = offset;
+            let counter = 1;          
+
+            forElementClass("week", (week) =>
             {
                 week.innerText = "";
                 week.classList = ["week"];
-                if (counter > offset)
+                // if (this.showWeeks)
+                //     week.style.display = "initial";
+                // else
+                //     week.style.display = "none";
+
+                if (counter > this.weekOffset)
                 {
                     let weeknumber = counter - offset;
                     let name = "week" + weeknumber.toDigits(2);
@@ -81,19 +117,36 @@
                     week.setAttribute('data-week', weeknumber);                    
                 }
                 counter++;
-            });
-        }  
+            });        
+        }          
 
-        showHolidays()
-        {            
-            Date.getFederalHolidays(this.myStartDate).forEach( (date) =>
+        toggleHolidays()
+        {
+            this.showHolidays = !this.showHolidays;
+            
+            if (this.showHolidays)
             {
-                configureElement(date.toISODate(), (calendarDate) =>
+                Date.getFederalHolidays(this.myStartDate).forEach( (date) =>
                 {
-                    calendarDate.classList.add("holiday");                    
-                    calendarDate.innerText = calendarDate.innerText + " " + date.holidayName;                
-                });                    
-            });
+                    configureElement(date.toISODate(), (calendarDate) =>
+                    {
+                        calendarDate.classList.add("holiday");
+                        calendarDate.setAttribute('data-oldInnerText', calendarDate.innerText);                    
+                        calendarDate.innerText = calendarDate.innerText + " " + date.holidayName;                
+                    });                    
+                });
+            }
+            else
+            {
+                forElementClass("date", (date) => 
+                {
+                    if (date.classList.contains("holiday"))
+                    {
+                        date.classList.remove("holiday");
+                        date.innerText = date.getAttribute('data-oldInnerText');
+                    }
+                }); 
+            }          
         }
 
         draw()
@@ -115,7 +168,7 @@
                 this.insertDay(day);
             }            
 
-            this.markWeeks(0);                        
+            this.markWeeks(this.weekOffset);                        
         }
 
         getCalendarStr = function(date)
