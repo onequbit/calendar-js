@@ -4,8 +4,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-
-    <link rel="stylesheet" type="text/css" href="calendar.css">
+    <link rel="stylesheet" type="text/css" href="./css/calendar.css">
 </head>
 
 <body>
@@ -34,133 +33,15 @@
         Week Offset
         <input id="ppOffset" type="number" min="-13" max="13" step="1" value="0">
     </div>
+    <div class="controls">
+        <button id="btnShowPayPeriods">Pay Periods</button>
+    </div>
     <br>
     <hr>
     <div id="calendar"></div>
 </body>
-<script src="library.js"></script>
-<script src="date_ext.js"></script>
-<script src="calendar.js"></script>
-<script>
-    "use strict";
-
-    // 2012 Federal Pay Period 1 : 20120101
-    
-    function getStartEndSpan()
-    {
-        let args = getUrlParameters();         
-        let start = Date.fromISODate(args.start) || Calendar.DEFAULTSTART;
-        let dateSpan = Calendar.DEFAULTSPAN;
-        let end = start.addDaysOffset(Calendar.DEFAULTSPAN);
-        console.log("getStartEndSpan:", JSON.stringify(args));
-        if (args.hasOwnProperty('end')) {
-            end = Date.fromISODate(args.end);
-            dateSpan = Date.getDaysOffset(start, end);            
-        }
-        if (start > end)
-        {
-            doRedirect("start=" + end.toISODate() + "&end=" + start.toISODate());
-        }
-        else
-            return [start, end, dateSpan];
-    }
-     
-    function main(event) 
-    {        
-        let [start, end, dateSpan] = getStartEndSpan();        
-
-        const calendar = new Calendar("calendar", start, end);
-        //calendar.toggleHolidays();
-
-        const monthSelector = new Date.MonthDropDown("selectMonth", start.getMonth(), (event) =>
-        {
-            let month = event.target.selectedIndex;
-            let newDate = new Date(start.getFullYear(),month,1);
-            let newEnd = new Date(newDate.addDaysOffset(dateSpan));
-            doRedirect("start=" + newDate.toISODate() + "&end=" + newEnd.toISODate());
-        });    
-
-        document.getElementById("currentYear").innerText = start.toISODateStr();
-
-        configureElement("btnLastYear", (lastYearButton) =>
-        {
-            let lastyear = start.lastYear(); 
-            let lastyearEnd = new Date(lastyear).nextDate(dateSpan);            
-            lastYearButton.innerText = lastyear.toISODateStr();
-            lastYearButton.onclick = (event) =>
-            {
-                doRedirect("start=" + lastyear.toISODate() + "&end=" + lastyearEnd.toISODate());
-            }
-        });
-        
-        configureElement("btnNextYear", (nextYearButton) =>
-        {
-            let nextyear = start.nextYear();
-            let nextyearEnd = new Date(nextyear).nextDate(dateSpan);            
-            nextYearButton.innerText = nextyear.toISODateStr();
-            nextYearButton.onclick = (event) =>
-            {
-                doRedirect("start=" + nextyear.toISODate() + "&end=" + nextyearEnd.toISODate());
-            };
-        });
-
-        configureElement("btnShowWeeks", (showWeeksButton) =>
-        {            
-            showWeeksButton.onclick = (event) =>
-            {
-                calendar.toggleWeeks();
-                if (calendar.showWeeks)
-                {
-                    showWeeksButton.classList.add('active');
-                    configureElement("spinnerWeekOffset", (spinner) =>
-                    {
-                        spinner.style.visibility = 'visible';
-                    });
-                }
-                else
-                {
-                    showWeeksButton.classList.remove('active');
-                    configureElement("spinnerWeekOffset", (spinner) =>
-                    {
-                        spinner.style.visibility = 'hidden';
-                    }); 
-                }                
-            };
-        });
-
-        configureElement("btnShowHolidays", (showHolidaysButton) =>
-        {            
-            showHolidaysButton.onclick = (event) =>
-            {
-                calendar.toggleHolidays();
-                if (calendar.showHolidays)
-                {
-                    showHolidaysButton.classList.add('active');
-                }
-                else
-                {
-                    showHolidaysButton.classList.remove('active');
-                }
-            };
-        });
-
-        configureElement("ppOffset", function(ppOffset)
-        {            
-           
-            ppOffset.onchange = (event) =>
-            {
-                let value = event.target.valueAsNumber;
-                calendar.markWeeks(value);
-            };
-        });
-    }
-
-    window.addEventListener("DOMContentLoaded", (event) =>
-    { 
-        main();
-    });
-
-
-</script>
-
+<script src="./js/library.js"></script>
+<script src="./js/date_ext.js"></script>
+<script src="./js/calendar.js"></script>
+<script src="./js/app.js"></script>
 </html>

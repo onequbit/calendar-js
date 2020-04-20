@@ -36,28 +36,63 @@
 
     })();
 
-    Date.thisYear = function()
-    {
-        return new Date().getFullYear();
-    }
+    Object.defineProperties(Date.prototype, {  
+        "year": {
+            get : function()
+            { 
+                return this.getFullYear();
+            },        
+            enumerable : true
+        },
+        "isNewYears": {
+            get : function()
+            { 
+                return this.getMonth() == 0 && this.getDate() == 1;
+            },        
+            enumerable : true
+        },
+        "isSunday": {
+            get : function()
+            { 
+                return this.getDay() == Date.SUNDAY; 
+            },        
+            enumerable : true
+        },
+        "isSaturday": {
+            get : function()
+            { 
+                return this.getDay() == Date.SATURDAY; 
+            },        
+            enumerable : true
+        },
+        "isWeekend": {
+            get : function()
+            { 
+                return this.isSunday || this.isSaturday;
+            },        
+            enumerable : true
+        },
+        "weekDay": {
+            get : function()
+            { 
+                return Date.WEEKDAYS[this.getDay()];
+            },        
+            enumerable : true
+        }
+    });
 
     Date.prototype.lastYear = function()
-    {
-        let newDate = new Date(this);
-        newDate.setFullYear(this.getFullYear() - 1);
-        return new Date(newDate);
+    {           
+        var newDate = new Date(this);
+        newDate.setFullYear(this.year - 1);
+        return newDate;
     }
 
     Date.prototype.nextYear = function()
     {
-        let newDate = new Date(this);
-        newDate.setFullYear(this.getFullYear() + 1);
-        return new Date(newDate);
-    }
-
-    Date.prototype.getWeekDay = function()
-    {        
-        return Date.WEEKDAYS[this.getDay()];
+        var newDate = new Date(this);
+        newDate.setFullYear(this.year + 1);
+        return newDate;
     }
 
     Date.prototype.nextDate = function(days = 1)
@@ -67,7 +102,7 @@
         return newDate;        
     }
     
-    Date.daysInMonth = function*(year = Date.thisYear(), month)
+    Date.daysInMonth = function*(year = new Date().year, month)
     {
         let day = new Date(year, month, 1);
         while (day.getMonth() == month)
@@ -77,29 +112,29 @@
         }        
     }
 
-    Date.nthDayOfMonth = function(count, day, month, year = Date.thisYear(), name = "")
+    Date.nthDayOfMonth = function(count, day, month, year = new Date().year, name = "")
     {
         let counter = 0;
         for (let date of Date.daysInMonth(year, month))
         {
-            if (date.getWeekDay() == Date.WEEKDAYS[day]) counter++;
+            if (date.weekDay == Date.WEEKDAYS[day]) counter++;
             if (counter == count) return date;
         }        
     }
 
-    Date.lastDayOfMonth = function(day, month, year = Date.thisYear(), name = "")
+    Date.lastDayOfMonth = function(day, month, year = new Date().year, name = "")
     {
         let list = [];
         for (let date of Date.daysInMonth(year, month))
         {
-            if (date.getWeekDay() == Date.WEEKDAYS[day]) list.push(date);            
+            if (date.weekDay == Date.WEEKDAYS[day]) list.push(date);            
         }
         let date = list.pop();
         date.holidayName = name;
         return date;
     }
     
-    Date.findSetHoliday = function(month, date, year = Date.thisYear(), name = "")
+    Date.findSetHoliday = function(month, date, year = new Date().year, name = "")
     {        
         let holiday = new Date(year, month, date);
         if (holiday.getDay() == Date.SATURDAY)
@@ -114,10 +149,17 @@
         return holiday; 
     }
 
-    Date.NewYears = function(year = Date.thisYear())
+    Date.NewYears = function(year = new Date().year)
     {
         let newDate = new Date(year, Date.JANUARY, 1);        
         newDate.holidayName = "New Year's Day"
+        return newDate;        
+    }
+
+    Date.NewYearsEve = function(year = new Date().year)
+    {
+        let newDate = new Date(year, Date.DECEMBER, 31);        
+        newDate.holidayName = "New Year's Eve"
         return newDate;        
     }
     
@@ -183,14 +225,19 @@
         return Date.MONTHS[this.getMonth()];
     }
 
+    // Date.prototype.getDayStr = function()
+    // {        
+    //     return Date.WEEKDAYS[this.getDay()];
+    // }
+
     Date.prototype.toISODateStr = function()
     {
         return this.toISOString().split('T')[0];
     }
 
     Date.prototype.toISODate = function()
-    {
-        return this.toISODateStr().replace(/-/g,'');        
+    {        
+        return this.toISOString().split('T')[0].replace(/-/g,'');        
     }
     
     Date.fromISODate = function(str)
@@ -240,5 +287,32 @@
             dropDown.onchange = onChangeFunction;
         });
     }
+
+    Date.getFirstSunday = function(year)
+    {
+        let start = Date.NewYears(year);
+        if (start.isSunday)
+            return start;
+        else
+        {
+            let date = start.getDate();
+            let offset = start.getDay();
+            let sunday = start.nextDate(7-offset);
+            return sunday;
+        }            
+    }
+
+    Date.getSundays = function(year)
+    {
+        let sundays = [];
+        let date = Date.getFirstSunday(year);
+        while (date.year == year)
+        {
+            sundays.push(date);
+            date = date.nextDate(7);
+        }
+        return sundays;        
+    }
+
 
     

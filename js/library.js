@@ -1,7 +1,7 @@
     "use strict";
 
-    
 
+    
     function attachConstant( someObj, constantName, constantValue, prototype = true )
     {        
         var attributes = {
@@ -62,6 +62,15 @@
             }
         });        
         return params;
+    }
+
+    function getUrlParameter(parameterName, alternateValue)
+    {
+        let params = getUrlParameters();
+        if (params.hasOwnProperty(parameterName))
+            return params[parameterName];
+        else
+            return alternateValue;        
     }
 
     function configureElement( id, setupFunction, debug = false )
