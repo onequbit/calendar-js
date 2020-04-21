@@ -6,7 +6,7 @@ function main(event)
 {
     console.log(event);
 
-    const calendarObj = new Calendar("calendar");
+    window.calendarObj = new Calendar("calendar");
     
     configureElement("selectMonth", (selectMonth) => 
     {

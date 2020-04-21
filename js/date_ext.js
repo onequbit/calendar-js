@@ -36,7 +36,7 @@
 
     })();
 
-    Object.defineProperties(Date.prototype, {  
+    Object.defineProperties(Date.prototype, {
         "year": {
             get : function()
             { 
@@ -101,10 +101,20 @@
         newDate.setDate(this.getDate()+days);
         return newDate;        
     }
+
+    Date.getDaysInSpan = function*(start, end)
+    {                
+        let day = new Date(start);
+        while (day <= end)
+        {            
+            yield day;
+            day = day.nextDate();
+        }                 
+    }
     
-    Date.daysInMonth = function*(year = new Date().year, month)
+    Date.daysInMonth = function*(year = new Date().year, month = new Date().getMonth())
     {
-        let day = new Date(year, month, 1);
+        let day = new Date(year, month, 1);        
         while (day.getMonth() == month)
         {            
             yield day;
@@ -114,8 +124,11 @@
 
     Date.nthDayOfMonth = function(count, day, month, year = new Date().year, name = "")
     {
+        if (!count) throw "count not specified";
+        if (!day) throw "day not specified";
+        if ( !(month >= 0 || month <= 11)) throw "invalid month not specified";        
         let counter = 0;
-        for (let date of Date.daysInMonth(year, month))
+        for (var date of Date.daysInMonth(year, month))
         {
             if (date.weekDay == Date.WEEKDAYS[day]) counter++;
             if (counter == count) return date;
@@ -124,18 +137,22 @@
 
     Date.lastDayOfMonth = function(day, month, year = new Date().year, name = "")
     {
+        if (!day) throw "day not specified";
+        if (!month) throw "month not specified";
         let list = [];
-        for (let date of Date.daysInMonth(year, month))
+        for (var date of Date.daysInMonth(year, month))
         {
             if (date.weekDay == Date.WEEKDAYS[day]) list.push(date);            
         }
-        let date = list.pop();
-        date.holidayName = name;
-        return date;
+        let newDate = list.pop();
+        newDate.holidayName = name;
+        return newDate;
     }
     
     Date.findSetHoliday = function(month, date, year = new Date().year, name = "")
-    {        
+    {
+        if (!month) throw "month not specified";
+        if (!date) throw "date not specified";        
         let holiday = new Date(year, month, date);
         if (holiday.getDay() == Date.SATURDAY)
         {
@@ -192,28 +209,7 @@
         return Math.round( (end - start) / Date.DAY );
     }
 
-    Date.getDaysInSpan = function*(start, end)
-    {                
-        let backwards = end < start;
-        if (backwards)
-        {
-            let day = new Date(end);
-            while (day <= start)
-            {            
-                yield day;
-                day = day.nextDate();
-            }
-        }
-        else
-        {
-            let day = new Date(start);
-            while (day <= end)
-            {            
-                yield day;
-                day = day.nextDate();
-            }
-        }         
-    }
+    
 
     Date.prototype.addDaysOffset = function(days)
     {        

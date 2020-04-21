@@ -58,10 +58,6 @@ class Calendar
         day.id = someDate.toISODate();
         day.innerText = this.getCalendarStr(someDate);        
         day.classList.add("date");  
-        
-        // let isSunday = someDate.getDay() === Date.SUNDAY;
-        // let isSaturday = someDate.getDay() === Date.SATURDAY;
-        // let isWeekend = isSaturday || isSunday;
 
         if (someDate.isBackdate)
         {
@@ -226,14 +222,14 @@ class Calendar
         this.markWeeks(this.weekOffset);                        
     }
 
-    getCalendarStr = function(date)
+    getCalendarStr(date)
     {
         if (date.holidayName == null) date.holidayName = "";
         let calendarStr = date.weekDay + " " + date.getMonthStr() + " " + date.getDate() + ", " + date.getFullYear();
         return calendarStr;
     }
     
-    toUrlParameters = function()
+    toUrlParameters()
     {
         var params = [
             "start=" + this.startDate.toISODate(),
@@ -246,21 +242,34 @@ class Calendar
         return params.join('&');
     }
 
-    setNewMonth = function(newMonth)
+    setNewMonth(newMonth)
     {        
         this.startDate = new Date(this.startDate.getFullYear(),newMonth,1);
         this.endDate = new Date(this.startDate.nextDate(this.dateSpan));
     }
 
-    setLastYear = function()
+    setLastYear()
     {
         this.startDate = this.startDate.lastYear(); 
         this.endDate = new Date(this.startDate.nextDate(this.dateSpan));
     }
 
-    setNextYear = function()
+    setNextYear()
     {
         this.startDate = this.startDate.nextYear();
         this.endDate = new Date(this.startDate.nextDate(this.dateSpan));
+    }
+
+    static testfunc(arg1, arg2, arg3)
+    {
+        var info = inspectFunction(this);
+        console.log("inspectFunction info: ", info);
+    }
+
+    testfunc(arg1, arg2, arg3)
+    {
+        var info = inspectFunction(this);
+        console.log("inspectFunction info: ", info);
+        var args = getFunctionArgs(this);
     }
 }
