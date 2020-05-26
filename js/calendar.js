@@ -1,3 +1,18 @@
+// class Day
+// {
+//     name = "";
+//     date = 0;
+//     calendarDate = Date();
+//     weekIndex = 0;
+//     constructor(someDate)
+//     {
+//         this.calendarDate = new Date(someDate);
+//         this.name = Date.WEEKDAYS[this.calendarDate.getDay()];
+//         this.weekIndex = Date.getWeek(this.calendarDate.getFullYear());
+//     }
+// }
+
+
 
 class Calendar
 {
@@ -6,15 +21,14 @@ class Calendar
     DEFAULTEND = Date.NewYears().addDaysOffset(this.DEFAULTSPAN);
     startDate = this.DEFAULTSTART;
     endDate = this.DEFAULTEND;
-    showWeeks = false;
+    showWeeks = true;
     showHolidays = false;
     weekOffset = 0;
-    showPayPeriods = false;
+    // showPayPeriods = false;
     dateSpan = this.DEFAULTSPAN;
 
-    constructor(divId, start = this.DEFAULTSTART, end = this.DEFAULTEND, 
-                showWeeks = false, showHolidays = false, weekOffset = 0,
-                showPayPeriods = false)
+    constructor(divId, start = this.DEFAULTSTART, end = this.DEFAULTEND, showHolidays = false)
+                // showWeeks = false, , weekOffset = 0, showPayPeriods = false)
     {        
         this.myDivId = divId;    
         this.div = document.getElementById(this.myDivId);
@@ -25,10 +39,10 @@ class Calendar
         this.endDate = Date.fromISODate(endDate);        
         this.dateSpan = Date.getDaysOffset(this.startDate, this.endDate);
 
-        this.weekOffset = parseInt(getUrlParameter("weekOffset", weekOffset));
-        this.showWeeks = getUrlParameter("showWeeks", showWeeks);
+        // this.weekOffset = parseInt(getUrlParameter("weekOffset", weekOffset));
+        // this.showWeeks = getUrlParameter("showWeeks", showWeeks);
         this.showHolidays = getUrlParameter("showHolidays", showHolidays);
-        this.showPayPeriods = getUrlParameter("showPayPeriods", showPayPeriods);
+        //this.showPayPeriods = getUrlParameter("showPayPeriods", showPayPeriods);
         
         Object.defineProperty( this, 'DEFAULTSPAN', { writable: false } );
         Object.defineProperty( this, 'DEFAULTSTART', { writable: false } );
@@ -85,18 +99,20 @@ class Calendar
             bump.classList.add("week");
 
             if (this.showWeeks)
-                bump.style.display = "initial";
+                bump.style.display = "block";
             else
                 bump.style.display = "none";
-
+            
+            bump.setAttribute('date-week', Date.getWeek(someDate));
+            bump.setAttribute('date-payperiod', Date.getPayPeriod(someDate));
             this.div.appendChild(bump);
         }
 
         if (someDate.isNewYears)
         {
             day.setAttribute('date-newyears', true);
-            if (someDate.isSunday) 
-                day.setAttribute('date-week', 1);
+            // if (someDate.isSunday) 
+            //     day.setAttribute('date-week', 1);
         }
         
         day.setAttribute('date-year', someDate.getFullYear() );
@@ -109,6 +125,8 @@ class Calendar
             let EOL = document.createElement("div");
             EOL.classList.add("EOL");
             this.div.appendChild(EOL);
+            this.div.appendChild(document.createElement("br"));
+            
         }
     }
 
@@ -125,26 +143,26 @@ class Calendar
         });            
     }
 
-    markWeeks(offset)
+    markWeeks()
     {
-        if (this.weekOffset != offset) this.weekOffset = offset;
-        let counter = 0;          
-
+        // forElementClass("week", (week) =>
+        // {
+        //     week.innerText = "";
+            
+        //     let weeknumber = week.getAttribute('date-week') | 0;                         
+        //     let name = "week" + weeknumber.toDigits(2);
+        //     week.classList.add(name);
+        //     week.innerText = name;                
+            
+        // });
         forElementClass("week", (week) =>
         {
-            week.innerText = "";
-            week.classList = ["week"];
-
-            if (counter > this.weekOffset)
-            {
-                let weeknumber = counter - offset;
-                let name = "week" + weeknumber.toDigits(2);
-                week.classList.add(name);
-                week.innerText = name;
-                week.setAttribute('data-week', weeknumber);                    
-            }
-            counter++;
-        });        
+            week.innerText = "";            
+            let payperiod = week.getAttribute('date-payperiod') | 0;                         
+            let name = "PP" + payperiod.toDigits(2);
+            week.classList.add(name);
+            week.innerText = name;                                
+        });            
     }          
 
     toggleHolidays()
@@ -176,29 +194,6 @@ class Calendar
         }          
     }
 
-    togglePayPeriods()
-    {
-        this.showPayPeriods = !this.showPayPeriods;
-        if (!this.showWeeks) this.toggleWeeks();
-                    
-        forElementClass("week", (week) =>
-        {         
-            var weeknumber = parseInt(week.dataset.week); 
-            if (weeknumber > 0)
-            {  
-                var payperiod = Math.round(weeknumber / 2);
-                console.log("weeknumber:", weeknumber, " -> payperiod:", payperiod);                       
-                if (this.showPayPeriods)
-                {          
-                    week.innerText = "PP" + payperiod.toDigits(2);
-                }                    
-                else
-                {
-                    week.innerText = "week" + weeknumber.toDigits(2);
-                }
-            }            
-        });       
-    }
 
     draw()
     {
@@ -234,10 +229,10 @@ class Calendar
         var params = [
             "start=" + this.startDate.toISODate(),
             "end=" + this.endDate.toISODate(),
-            "weekOffset=" + this.weekOffset,
-            "showWeeks=" + this.showWeeks,
-            "showHolidays=" + this.showHolidays,
-            "showPayPeriods=" + this.showPayPeriods
+            "showHolidays=" + this.showHolidays
+            // "weekOffset=" + this.weekOffset,
+            // "showWeeks=" + this.showWeeks,            
+            // "showPayPeriods=" + this.showPayPeriods
         ];
         return params.join('&');
     }
@@ -262,14 +257,21 @@ class Calendar
 
     static testfunc(arg1, arg2, arg3)
     {
-        var info = inspectFunction(this);
-        console.log("inspectFunction info: ", info);
+        // var info = inspectFunction(this);
+        // console.log("testfunc -> inspectFunction info: ", info);
+        // var args = getFunctionArgs(this, arguments);
+        // console.log("testfunc -> args:", args);
+        return this.testfunc.debug(arguments);
     }
 
     testfunc(arg1, arg2, arg3)
     {
-        var info = inspectFunction(this);
-        console.log("inspectFunction info: ", info);
-        var args = getFunctionArgs(this);
+        // var info = inspectFunction(this);
+        // console.log("testfunc -> inspectFunction info: ", info);
+        // var args = getFunctionArgs(this, arguments);
+        // console.log("testfunc -> args:", args);
+        return this.testfunc.debug(arguments);
     }
 }
+
+// module.exports.Calendar = Calendar;

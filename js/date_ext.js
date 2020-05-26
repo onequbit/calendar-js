@@ -1,6 +1,21 @@
     "use strict";
     
     (function() {
+
+        function attachConstant( someObj, constantName, constantValue, prototype = true )
+        {        
+            var attributes = {
+                value: constantValue,
+                writable: false,
+                enumerable: true,
+                configurable: true
+            };
+            if (prototype)
+                Object.defineProperty( someObj.prototype, constantName, attributes );
+            else
+                Object.defineProperty( someObj, constantName, attributes );            
+        }
+        
         var CONSTANTS = {
             SUNDAY : 0,
             MONDAY : 1,
@@ -308,6 +323,28 @@
             date = date.nextDate(7);
         }
         return sundays;        
+    }
+
+    Date.getWeek = function(someDate)
+    {           
+        let d = new Date(someDate);
+        let weeks = Date.getSundays(d.getFullYear());
+        for (var i=0; i<weeks.length; i++)
+        {            
+            if (weeks[i] > d) 
+            {
+                return i;
+            }
+        }
+        return 52;        
+    }
+
+    Date.getPayPeriod = function(someDate)
+    {
+        let weekNumber = Date.getWeek(someDate);
+        if (weekNumber < 1) return 26;
+        if (weekNumber % 2 == 1) weekNumber += 1;
+        return weekNumber / 2;
     }
 
 
