@@ -1,4 +1,6 @@
-
+body {
+    padding-top: 7vh;
+}
 
 div {
     display: inline-block;    
@@ -38,9 +40,7 @@ div.backdate {
 }
 
 div.holiday {
-    /* display: block;
-    clear: both;
-    float: none; */
+
     background-color: #ddf;
 }
 
@@ -59,6 +59,17 @@ div.controls {
     font-size: 2.5vh;        
 }
 
+div.controls-container {
+    position: fixed;
+    top: 0;
+    width: 100%;    
+    margin: auto;
+    height: auto;
+    background-color: white;
+}
+
+
+
 button, input, select {
     font-size: 2.5vh;
     text-align: center;
@@ -76,10 +87,4 @@ input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {  
     opacity: 1;        
     transform: scale(1.75);        
-}
-
-@supports (-ms-ime-align: auto) {
-    div.holiday {
-        -webkit-animation: unset;        
-    }
 }
