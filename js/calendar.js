@@ -1,54 +1,25 @@
-// class Day
-// {
-//     name = "";
-//     date = 0;
-//     calendarDate = Date();
-//     weekIndex = 0;
-//     constructor(someDate)
-//     {
-//         this.calendarDate = new Date(someDate);
-//         this.name = Date.WEEKDAYS[this.calendarDate.getDay()];
-//         this.weekIndex = Date.getWeek(this.calendarDate.getFullYear());
-//     }
-// }
-
-
 
 class Calendar
 {
-    DEFAULTSPAN = 365;
-    DEFAULTSTART = Date.NewYears();
-    DEFAULTEND = Date.NewYears().addDaysOffset(this.DEFAULTSPAN);
-    startDate = this.DEFAULTSTART;
-    endDate = this.DEFAULTEND;
-    showWeeks = true;
-    showHolidays = false;
-    weekOffset = 0;
-    // showPayPeriods = false;
-    dateSpan = this.DEFAULTSPAN;
-
-    constructor(divId, start = this.DEFAULTSTART, end = this.DEFAULTEND, showHolidays = false)
-                // showWeeks = false, , weekOffset = 0, showPayPeriods = false)
-    {        
+    constructor(divId, start, end, showHolidays = true)                
+    {   
         this.myDivId = divId;    
         this.div = document.getElementById(this.myDivId);
-      
-        let startDate = getUrlParameter("start", new Date(start).toISODate());
-        this.startDate = Date.fromISODate(startDate);
-        let endDate = getUrlParameter("end", new Date(end).toISODate());
-        this.endDate = Date.fromISODate(endDate);        
-        this.dateSpan = Date.getDaysOffset(this.startDate, this.endDate);
 
-        // this.weekOffset = parseInt(getUrlParameter("weekOffset", weekOffset));
-        // this.showWeeks = getUrlParameter("showWeeks", showWeeks);
-        this.showHolidays = getUrlParameter("showHolidays", showHolidays);
-        //this.showPayPeriods = getUrlParameter("showPayPeriods", showPayPeriods);
+        this.DEFAULTSTART = Date.NewYears();
+        this.DEFAULTEND = Date.NewYears().nextYear();
+        this.DEFAULTSPAN = 365;                
+                
+        this.startDate = Date.fromISODate(getUrlParameter("start", start || this.DEFAULTSTART.toISODate()));                
+        this.endDate = Date.fromISODate(getUrlParameter("end", end || this.DEFAULTEND.toISODate()));        
+        this.dateSpan = Date.getDaysOffset(this.startDate, this.endDate);        
+        
+        this.showHolidays = showHolidays || getUrlParameter("showHolidays", true);
         
         Object.defineProperty( this, 'DEFAULTSPAN', { writable: false } );
         Object.defineProperty( this, 'DEFAULTSTART', { writable: false } );
         Object.defineProperty( this, 'DEFAULTEND', { writable: false } );        
 
-        console.log("drawing calendar:", this);            
         if (this.div != null)
         {
             this.draw();
@@ -68,7 +39,7 @@ class Calendar
 
     insertDay(someDate)
     {            
-        let day = document.createElement("div");
+        let day = document.createElement("div");        
         day.id = someDate.toISODate();
         day.innerText = this.getCalendarStr(someDate);        
         day.classList.add("date");  
@@ -97,11 +68,6 @@ class Calendar
         {
             let bump = document.createElement("div");
             bump.classList.add("week");
-
-            if (this.showWeeks)
-                bump.style.display = "block";
-            else
-                bump.style.display = "none";
             
             bump.setAttribute('date-week', Date.getWeek(someDate));
             bump.setAttribute('date-payperiod', Date.getPayPeriod(someDate));
@@ -110,9 +76,7 @@ class Calendar
 
         if (someDate.isNewYears)
         {
-            day.setAttribute('date-newyears', true);
-            // if (someDate.isSunday) 
-            //     day.setAttribute('date-week', 1);
+            day.setAttribute('date-newyears', true);            
         }
         
         day.setAttribute('date-year', someDate.getFullYear() );
@@ -125,36 +89,12 @@ class Calendar
             let EOL = document.createElement("div");
             EOL.classList.add("EOL");
             this.div.appendChild(EOL);
-            this.div.appendChild(document.createElement("br"));
-            
+            this.div.appendChild(document.createElement("br"));            
         }
     }
 
-    toggleWeeks()
-    {
-        this.showWeeks = !this.showWeeks;
-            
-        forElementClass("week", (week) =>
-        {
-            if (this.showWeeks)
-                week.style.display = "initial";
-            else
-                week.style.display = "none";
-        });            
-    }
-
     markWeeks()
-    {
-        // forElementClass("week", (week) =>
-        // {
-        //     week.innerText = "";
-            
-        //     let weeknumber = week.getAttribute('date-week') | 0;                         
-        //     let name = "week" + weeknumber.toDigits(2);
-        //     week.classList.add(name);
-        //     week.innerText = name;                
-            
-        // });
+    {        
         forElementClass("week", (week) =>
         {
             week.innerText = "";            
@@ -163,41 +103,40 @@ class Calendar
             week.classList.add(name);
             week.innerText = name;                                
         });            
-    }          
+    }
+    
+    setHolidays()
+    {
+        Date.getFederalHolidays(this.startDate).forEach((holiday) =>
+        {
+            configureElement(holiday.toISODate(), (holidayDate) =>
+            {
+                let marker = document.createElement("div");
+                marker.classList.add("holiday");
+                // marker.setAttribute('data-oldInnerText', holidayDate.innerText);                    
+                marker.innerText = holiday.holidayName;
+                holidayDate.innerHTML = holidayDate.innerHTML + "&nbsp;<br/>";
+                holidayDate.appendChild(marker);
+            });                    
+        });
+    }
 
     toggleHolidays()
     {
-        this.showHolidays = !this.showHolidays;
+        this.showHolidays = !(this.showHolidays);
+        forElementClass("holiday", (holiday) =>
+        {            
+            if (this.showHolidays)
+                holiday.style.display = "block";
+            else
+                holiday.style.display = "none";            
+        });        
         
-        if (this.showHolidays)
-        {
-            Date.getFederalHolidays(this.startDate).forEach( (date) =>
-            {
-                configureElement(date.toISODate(), (calendarDate) =>
-                {
-                    calendarDate.classList.add("holiday");
-                    calendarDate.setAttribute('data-oldInnerText', calendarDate.innerText);                    
-                    calendarDate.innerText = calendarDate.innerText + " " + date.holidayName;                
-                });                    
-            });
-        }
-        else
-        {
-            forElementClass("date", (date) => 
-            {
-                if (date.classList.contains("holiday"))
-                {
-                    date.classList.remove("holiday");
-                    date.innerText = date.getAttribute('data-oldInnerText');
-                }
-            }); 
-        }          
     }
-
 
     draw()
     {
-        this.div.innerHTML = "";
+        this.div.innerHTML = "";        
         let offset = this.startDate.getDay();
         if (offset != 0)
         {
@@ -212,9 +151,9 @@ class Calendar
         for (let day of Date.getDaysInSpan(this.startDate, this.endDate))
         {                
             this.insertDay(day);
-        }            
-
-        this.markWeeks(this.weekOffset);                        
+        }
+        this.markWeeks();                        
+        this.setHolidays();        
     }
 
     getCalendarStr(date)
@@ -230,9 +169,6 @@ class Calendar
             "start=" + this.startDate.toISODate(),
             "end=" + this.endDate.toISODate(),
             "showHolidays=" + this.showHolidays
-            // "weekOffset=" + this.weekOffset,
-            // "showWeeks=" + this.showWeeks,            
-            // "showPayPeriods=" + this.showPayPeriods
         ];
         return params.join('&');
     }
@@ -254,24 +190,4 @@ class Calendar
         this.startDate = this.startDate.nextYear();
         this.endDate = new Date(this.startDate.nextDate(this.dateSpan));
     }
-
-    static testfunc(arg1, arg2, arg3)
-    {
-        // var info = inspectFunction(this);
-        // console.log("testfunc -> inspectFunction info: ", info);
-        // var args = getFunctionArgs(this, arguments);
-        // console.log("testfunc -> args:", args);
-        return this.testfunc.debug(arguments);
-    }
-
-    testfunc(arg1, arg2, arg3)
-    {
-        // var info = inspectFunction(this);
-        // console.log("testfunc -> inspectFunction info: ", info);
-        // var args = getFunctionArgs(this, arguments);
-        // console.log("testfunc -> args:", args);
-        return this.testfunc.debug(arguments);
-    }
 }
-
-// module.exports.Calendar = Calendar;

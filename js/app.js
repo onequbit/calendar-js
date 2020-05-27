@@ -4,9 +4,9 @@
     
 function main(event) 
 {
-    console.log(event);
+    if (event) console.log(event);
 
-    window.calendarObj = new Calendar("calendar");
+    window.calendarObj = new Calendar("calendar");    
     
     configureElement("selectMonth", (selectMonth) => 
     {
@@ -41,34 +41,13 @@ function main(event)
         };
     });
 
-    configureElement("btnShowWeeks", (showWeeksButton) =>
-    {            
-        showWeeksButton.onclick = (event) =>
-        {
-            calendarObj.toggleWeeks();
-            if (calendarObj.showWeeks)
-            {
-                showWeeksButton.classList.add('active');
-                configureElement("spinnerWeekOffset", (spinner) =>
-                {
-                    spinner.style.visibility = 'visible';
-                });
-            }
-            else
-            {
-                showWeeksButton.classList.remove('active');
-                configureElement("spinnerWeekOffset", (spinner) =>
-                {
-                    spinner.style.visibility = 'hidden';
-                }); 
-            }                
-        };
-    });
+    document.getElementById("btnShowHolidays").classList.add('active');
 
     configureElement("btnShowHolidays", (showHolidaysButton) =>
-    {            
+    {       
         showHolidaysButton.onclick = (event) =>
         {
+            console.log("holidays button clicked");
             calendarObj.toggleHolidays();
             if (calendarObj.showHolidays)
             {
@@ -80,32 +59,7 @@ function main(event)
             }
         };
     });
-
-    configureElement("ppOffset", function(ppOffset)
-    {            
-        
-        ppOffset.onchange = (event) =>
-        {
-            let value = event.target.valueAsNumber;
-            calendarObj.markWeeks(value);
-        };
-    });
-
-    configureElement("btnShowPayPeriods", (showPayPeriodsButton) =>
-    {            
-        showPayPeriodsButton.onclick = (event) =>
-        {
-            calendarObj.togglePayPeriods();
-            if (calendarObj.showPayPeriods)
-            {
-                showPayPeriodsButton.classList.add('active');
-            }
-            else
-            {
-                showPayPeriodsButton.classList.remove('active');
-            }
-        };
-    });
+    
 }
 
 window.addEventListener("DOMContentLoaded", (event) =>

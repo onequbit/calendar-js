@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -8,30 +9,36 @@
 </head>
 
 <body>
-    <div class="controls">
-        <button id="btnLastYear">Previous Year</button>
-    </div>
-    <div class="controls">
-        <label id="currentYear"></label>
-    </div>
-    <div class="controls">
-        <button id="btnNextYear">Next Year</button>
-    </div>
-    <div class="controls">
-        <select id="selectMonth"></select>
-    </div>
-    <div class="controls">
-        &nbsp;&nbsp;&nbsp;
-    </div>    
-    <div class="controls">
-        <button id="btnShowHolidays">Holidays</button>
+    <div class="controls-container">
+        <div class="controls">
+            Previous Year<br/>
+            <button id="btnLastYear"></button>
+        </div>
+        <div class="controls">
+            Current Year<br/>
+            <label id="currentYear"></label>
+        </div>
+        <div class="controls">
+            Next Year<br/>
+            <button id="btnNextYear">Next Year</button>
+        </div>
+        <div class="controls">
+            Month<br/>
+            <select id="selectMonth"></select>
+        </div>
+        <div class="controls">
+            &nbsp;&nbsp;&nbsp;
+        </div>    
+        <div class="controls">
+            <button id="btnShowHolidays">Holidays</button>
+        </div>
     </div>
     <br>
     <hr>
     <div id="calendar"></div>
+    <script type="text/javascript" src="./js/library.js" > </script>
+    <script type="text/javascript" src="./js/date_ext.js" > </script>
+    <script type="text/javascript" src="./js/calendar.js" > </script>
+    <script type="text/javascript" src="./js/app.js" > </script>
 </body>
-<script src="./js/library.js"></script>
-<script src="./js/date_ext.js"></script>
-<script src="./js/calendar.js"></script>
-<script src="./js/app.js"></script>
 </html>

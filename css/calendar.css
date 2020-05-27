@@ -38,6 +38,9 @@ div.backdate {
 }
 
 div.holiday {
+    /* display: block;
+    clear: both;
+    float: none; */
     background-color: #ddf;
 }
 
@@ -73,4 +76,10 @@ input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {  
     opacity: 1;        
     transform: scale(1.75);        
+}
+
+@supports (-ms-ime-align: auto) {
+    div.holiday {
+        -webkit-animation: unset;        
+    }
 }

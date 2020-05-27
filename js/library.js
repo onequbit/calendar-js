@@ -13,6 +13,7 @@ Object.prototype.toStr = function()
     return this.toString().toStr();
 }
 
+
 Function.prototype.getCallStack = function()
 {
     var stack = new Error().stack.split('\n').trim();    
@@ -128,7 +129,7 @@ function getUrlParameters()
 }
 
 function getUrlParameter(parameterName, alternateValue)
-{
+{    
     let params = getUrlParameters();
     if (params.hasOwnProperty(parameterName))
         return params[parameterName];
@@ -173,4 +174,9 @@ function forElementClass( className, mappedFunction, debug = false )
             return;
         }     
     })
+}
+
+function debuglog()
+{   
+    console.log(JSON.stringify(arguments));     
 }

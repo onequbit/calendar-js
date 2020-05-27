@@ -146,7 +146,11 @@
         for (var date of Date.daysInMonth(year, month))
         {
             if (date.weekDay == Date.WEEKDAYS[day]) counter++;
-            if (counter == count) return date;
+            if (counter == count) 
+            {
+                date.holidayName = name;
+                return date;
+            }
         }        
     }
 
@@ -236,48 +240,50 @@
         return Date.MONTHS[this.getMonth()];
     }
 
-    // Date.prototype.getDayStr = function()
-    // {        
-    //     return Date.WEEKDAYS[this.getDay()];
-    // }
+    Date.toISODateStr = function(d)
+    {        
+        return d.toISOString().split('T')[0];
+    }
 
     Date.prototype.toISODateStr = function()
-    {
-        return this.toISOString().split('T')[0];
+    {        
+        return Date.toISODateStr(this);
+    }
+
+    Date.toISODate = function(d)
+    {        
+        return d.toISOString().split('T')[0].replace(/-/g,'');        
     }
 
     Date.prototype.toISODate = function()
     {        
-        return this.toISOString().split('T')[0].replace(/-/g,'');        
+        return Date.toISODate(this);
     }
     
     Date.fromISODate = function(str)
-    {
-        let newDate = null;
-        const not_a_number = str == null || str == "" || ( /^\d+$/.test(str) === false );            
-        if (not_a_number) return null;        
-        try
+    {        
+        var newDate = new Date();
+        if (!str || str == "" || str.length < 4) throw "invalid ISO date";
+        
+        let year = str.substr(0,4);
+        try 
         {
-            if (str.length != 8) return null;
-
-            let year = str.substr(0,4);
-            newDate = new Date(year, Date.JANUARY,1);
+            newDate = new Date(year, Date.JANUARY,1);            
             if (str.length > 4)
             {
                 let month = parseInt(str.substr(4,2))-1;
-                newDate.setMonth(month);
+                newDate.setMonth(month);                
             }            
             if (str.length == 8)
             {
                 let date = str.substr(6,2);
-                newDate.setDate(date);
-            }                 
+                newDate.setDate(date);                
+            }
         }
-        catch (exception)
+        catch (e)
         {
-            console.log(exception); 
-            console.log(newDate);           
-        }                
+            throw "failed to convert ISO date to Date object";
+        }        
         return newDate;
     }
 
