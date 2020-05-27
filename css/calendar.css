@@ -68,8 +68,6 @@ div.controls-container {
     background-color: white;
 }
 
-
-
 button, input, select {
     font-size: 2.5vh;
     text-align: center;
@@ -87,4 +85,9 @@ input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {  
     opacity: 1;        
     transform: scale(1.75);        
+}
+
+#btnHome {
+    font-size: 7vh;
+    font-weight: bold;
 }

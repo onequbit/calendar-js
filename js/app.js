@@ -59,6 +59,14 @@ function main(event)
             }
         };
     });
+
+    configureElement("btnHome", (homeButton) =>
+    {       
+        homeButton.onclick = (event) =>
+        {
+            doRedirect([""]);            
+        };
+    });
     
 }
 
