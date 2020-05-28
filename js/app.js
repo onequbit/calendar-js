@@ -6,6 +6,16 @@ function main(event)
 {
     if (event) console.log(event);
 
+    configureElement("input_date_start", (input_date_start) =>
+    {
+        input_date_start.value = Date.NewYears().toISODateStr();
+    });
+
+    configureElement("input_date_end", (input_date_end) =>
+    {
+        input_date_end.value = Date.NewYears().nextYear().toISODateStr();
+    });
+
     window.calendarObj = new Calendar("calendar");    
     
     configureElement("selectMonth", (selectMonth) => 
@@ -14,7 +24,7 @@ function main(event)
         {            
             let month = event.target.selectedIndex;
             calendarObj.setNewMonth(month);                                         
-            doRedirect(calendarObj.toUrlParameters());
+            calendarObj.draw(); // doRedirect(calendarObj.toUrlParameters());
         });    
     });
 
@@ -26,7 +36,7 @@ function main(event)
         lastYearButton.onclick = () =>
         {
             calendarObj.setLastYear();
-            doRedirect(calendarObj.toUrlParameters());
+            calendarObj.draw(); // doRedirect(calendarObj.toUrlParameters());
         }
     });
     
@@ -37,26 +47,7 @@ function main(event)
         nextYearButton.onclick = (event) =>
         {
             calendarObj.setNextYear();
-            doRedirect(calendarObj.toUrlParameters());
-        };
-    });
-
-    document.getElementById("btnShowHolidays").classList.add('active');
-
-    configureElement("btnShowHolidays", (showHolidaysButton) =>
-    {       
-        showHolidaysButton.onclick = (event) =>
-        {
-            console.log("holidays button clicked");
-            calendarObj.toggleHolidays();
-            if (calendarObj.showHolidays)
-            {
-                showHolidaysButton.classList.add('active');
-            }
-            else
-            {
-                showHolidaysButton.classList.remove('active');
-            }
+            calendarObj.draw(); // doRedirect(calendarObj.toUrlParameters());
         };
     });
 
@@ -64,7 +55,7 @@ function main(event)
     {       
         homeButton.onclick = (event) =>
         {
-            doRedirect([""]);            
+            calendarObj.draw(); // doRedirect([""]);            
         };
     });
     

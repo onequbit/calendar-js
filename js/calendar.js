@@ -15,6 +15,8 @@ class Calendar
         this.dateSpan = Date.getDaysOffset(this.startDate, this.endDate);        
         
         this.showHolidays = showHolidays || getUrlParameter("showHolidays", true);
+
+        this.focusDate = this.getPayPeriodFocus();
         
         Object.defineProperty( this, 'DEFAULTSPAN', { writable: false } );
         Object.defineProperty( this, 'DEFAULTSTART', { writable: false } );
@@ -67,10 +69,13 @@ class Calendar
         if (someDate.isSunday) 
         {
             let bump = document.createElement("div");
+            let payperiod = Date.getPayPeriod(someDate);
+            bump.id = "PP" + payperiod;
             bump.classList.add("week");
-            
-            bump.setAttribute('date-week', Date.getWeek(someDate));
-            bump.setAttribute('date-payperiod', Date.getPayPeriod(someDate));
+            let weekNumber = Date.getWeek(someDate);
+            if (weekNumber % 2 == 0) bump.id += "_";                    
+            bump.setAttribute('date-week', weekNumber);
+            bump.setAttribute('date-payperiod', payperiod);
             this.div.appendChild(bump);
         }
 
@@ -112,8 +117,7 @@ class Calendar
             configureElement(holiday.toISODate(), (holidayDate) =>
             {
                 let marker = document.createElement("div");
-                marker.classList.add("holiday");
-                // marker.setAttribute('data-oldInnerText', holidayDate.innerText);                    
+                marker.classList.add("holiday");                
                 marker.innerText = holiday.holidayName;
                 holidayDate.innerHTML = holidayDate.innerHTML + "&nbsp;<br/>";
                 holidayDate.appendChild(marker);
@@ -189,5 +193,10 @@ class Calendar
     {
         this.startDate = this.startDate.nextYear();
         this.endDate = new Date(this.startDate.nextDate(this.dateSpan));
+    }
+
+    getPayPeriodFocus()
+    {
+        return "PP" + Date.getPayPeriod(new Date()).toDigits(2);
     }
 }
